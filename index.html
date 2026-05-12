@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoShield AI | Industrial Multimodal Auditor</title>
+    <style>
+        :root { 
+            --bg: #020617; --card: rgba(15, 23, 42, 0.95); --accent: #0ea5e9; 
+            --danger: #f43f5e; --success: #10b981; --border: rgba(255, 255, 255, 0.1); 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: var(--bg); color: #f8fafc; font-family: 'Inter', system-ui, sans-serif; 
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column; 
+        }
+
+        /* Top HUD Connectivity */
+        .hud-top { position: absolute; top: 25px; left: 25px; display: flex; gap: 12px; z-index: 1000; }
+        .chip { 
+            background: var(--card); border: 1px solid var(--border); backdrop-blur: 15px; 
+            padding: 10px 18px; border-radius: 12px; display: flex; align-items: center; gap: 10px; 
+            font-size: 11px; font-weight: 800; text-transform: uppercase;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .pulse { animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; filter: brightness(1.8); } 50% { opacity: 0.3; } }
+
+        /* Multimodal Intelligence Sidebar */
+        .sidebar {
+            position: absolute; top: 100px; left: 25px; width: 340px;
+            background: var(--card); border: 1px solid var(--border); 
+            padding: 24px; border-radius: 20px; backdrop-blur: 25px; z-index: 100;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        .label { font-size: 10px; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; display: block; }
+        .ai-output { font-size: 13px; line-height: 1.6; color: #94a3b8; border-left: 3px solid var(--accent); padding-left: 15px; }
+
+        /* The Viewport System */
+        .viewport { position: relative; flex: 1; background: #000; overflow: hidden; }
+        #camera-mount { 
+            position: absolute; width: 250%; height: 250%; top: -75%; left: -75%;
+            transition: transform 0.15s cubic-bezier(0.2, 0, 0.2, 1);
+            display: flex; align-items: center; justify-content: center;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.1) brightness(0.9); }
+
+        /* DYNAMIC SMART SCANNER */
+        #smart-scanner {
+            position: absolute; border: 3px solid var(--danger);
+            width: 280px; height: 180px; display: block; z-index: 500;
+            pointer-events: none; transition: transform 0.1s linear;
+            box-shadow: 0 0 40px rgba(244, 63, 94, 0.6);
+            background: rgba(244, 63, 94, 0.1);
+        }
+        #smart-scanner::before {
+            content: "FAULT_DETECTED: COMPONENT_B12"; position: absolute; top: -30px; left: -3px;
+            background: var(--danger); font-size: 10px; padding: 5px 12px; font-weight: 900; color: white;
+        }
+        .scan-data { position: absolute; bottom: 10px; left: 10px; font-family: monospace; font-size: 9px; color: var(--danger); font-weight: bold; }
+
+        /* Sector Switcher */
+        .sector-controls { position: absolute; top: 25px; right: 25px; display: flex; gap: 8px; z-index: 1000; }
+        .btn-sector {
+            background: var(--card); border: 1px solid var(--border); color: white; 
+            padding: 10px 16px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 800;
+            text-transform: uppercase; backdrop-blur: 10px; transition: 0.3s;
+        }
+        .btn-sector.active { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.1); }
+
+        /* Full Screen Overlays */
+        .fs-panel {
+            position: absolute; inset: 0; background: rgba(2, 6, 23, 0.98); 
+            z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px; backdrop-blur: 40px; text-align: center;
+        }
+        .fs-panel.active { display: flex; }
+        .audit-card { background: #0f172a; border: 1px solid var(--border); padding: 30px; border-radius: 24px; text-align: left; max-width: 400px; }
+
+        /* Toolset Controls */
+        .toolset { position: absolute; bottom: 140px; right: 25px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
+        .btn-tool { 
+            background: var(--card); border: 1px solid var(--border); color: white; padding: 14px; 
+            border-radius: 12px; cursor: pointer; font-size: 11px; font-weight: 800; text-transform: uppercase;
+        }
+        .btn-primary { background: var(--accent); color: var(--bg); border: none; font-weight: 900; }
+
+        /* Bottom Nav */
+        nav { 
+            height: 120px; background: #020617; border-top: 1px solid var(--border);
+            display: flex; justify-content: center; gap: 100px; align-items: center; z-index: 3000;
+        }
+        .nav-link { 
+            background: none; border: none; color: #475569; 
+            display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer;
+        }
+        .nav-link.active { color: var(--accent); }
+        .nav-link span { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+        svg { width: 30px; height: 30px; }
+    </style>
+</head>
+<body>
+
+    <!-- HUD TOP -->
+    <div class="hud-top">
+        <div class="chip"><div class="dot pulse" style="background:var(--danger)"></div> STREAM: FACTORY_LIVE</div>
+        <div class="chip"><div class="dot pulse" style="background:var(--success)"></div> BT_LINK: DRONE_S7_ACTIVE</div>
+    </div>
+
+    <!-- Sector Switcher -->
+    <div class="sector-controls">
+        <button class="btn-sector active" onclick="changeSector(0, this)">Robotics Sector</button>
+        <button class="btn-sector" onclick="changeSector(1, this)">Logistics Hub</button>
+        <button class="btn-sector" onclick="changeSector(2, this)">Circuit Assembly</button>
+    </div>
+
+    <!-- Intelligence Sidebar -->
+    <div class="sidebar">
+        <span class="label">Multimodal Reasoning</span>
+        <div class="ai-output" id="ai-log">
+            <b>SCANNING:</b> Factory Sector A-01. <br><br>
+            Agent comparing live visuals to <b>ISO-14001:2026</b> standards. <br><br>
+            Use <b>WASD</b> to move, <b>Scroll</b> to Zoom.
+        </div>
+    </div>
+
+    <!-- Live Viewport -->
+    <div class="viewport">
+        <div id="camera-mount">
+            <video id="v-player" autoplay muted loop playsinline crossorigin="anonymous">
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-automatic-robotic-arm-working-in-a-factory-42475-large.mp4" type="video/mp4">
+            </video>
+            <!-- TARGET SCANNER -->
+            <div id="smart-scanner">
+                <div class="scan-data">
+                    ERR_CODE: COMP_FAIL_77<br>
+                    TEMP: 88.4°C (EXCEEDS)<br>
+                    REF: NATURE_JOURNAL_2026
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tools -->
+    <div class="toolset">
+        <button class="btn-tool btn-primary" onclick="document.getElementById('file-upload').click()">Upload Custom Feed</button>
+        <input type="file" id="file-upload" style="display:none" accept="video/*" onchange="handleUpload(event)">
+        <button class="btn-tool" onclick="resetView()">Reset Cam</button>
+        <div style="font-size: 9px; color: #444; font-weight: 800; text-align: center;">WASD | SCROLL</div>
+    </div>
+
+    <!-- Decision Overlays -->
+    <div id="panel-decision" class="fs-panel">
+        <h1 style="color:var(--accent); font-size: 32px; margin-bottom: 20px;">AUDIT DECISION ENGINE</h1>
+        <div style="display:flex; gap:30px;">
+            <div class="audit-card" style="border-left: 5px solid var(--danger);">
+                <h3 style="color:var(--danger); margin-bottom: 10px;">ANOMALY</h3>
+                <p style="font-size: 13px; line-height: 1.6; color:#94a3b8;">Visual mismatch found. Robotic arm joint friction exceeds compliance thresholds by 22%.</p>
+            </div>
+            <div class="audit-card" style="border-left: 5px solid var(--success);">
+                <h3 style="color:var(--success); margin-bottom: 10px;">GOLD STANDARD</h3>
+                <p style="font-size: 13px; line-height: 1.6; color:#94a3b8;">Verified Standard (ISO 2026): "High-speed components must operate below 70°C for ESG carbon safety."</p>
+            </div>
+        </div>
+        <button class="btn-tool" style="margin-top: 40px; padding: 20px 60px;" onclick="closePanels()">Resume Feed</button>
+    </div>
+
+    <!-- Fix Overlay -->
+    <div id="panel-fix" class="fs-panel">
+        <div style="font-size: 60px; margin-bottom: 20px;">🦾</div>
+        <h1 style="margin-bottom: 10px;">AUTONOMOUS FIX</h1>
+        <p style="color:#64748b; max-width: 500px; margin-bottom: 30px;">Agent authorized to dispatch maintenance and update financial liability logs.</p>
+        <div id="fix-log" style="background:#000; padding:20px; border-radius:12px; font-family:monospace; color:var(--success); width: 400px; text-align:left; font-size: 12px;">> Awaiting authorization...</div>
+        <button class="btn-tool btn-primary" style="width: 400px; margin-top: 20px; padding: 20px;" onclick="runFix()">Execute Fix</button>
+    </div>
+
+    <!-- Nav -->
+    <nav>
+        <button class="nav-link active" onclick="nav('obs')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Observe</span>
+        </button>
+        <button class="nav-link" onclick="nav('dec')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
+            <span>Decision</span>
+        </button>
+        <button class="nav-link" onclick="nav('fix')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 14 7-9 1 9h10l-7 9-1-9H5Z"/></svg>
+            <span>Fix</span>
+        </button>
+    </nav>
+
+    <script>
+        let px = 0, py = 0, zoom = 1;
+        const mount = document.getElementById('camera-mount');
+        const scanner = document.getElementById('smart-scanner');
+        const log = document.getElementById('ai-log');
+        const v = document.getElementById('v-player');
+
+        const sectors = [
+            "https://assets.mixkit.co/videos/preview/mixkit-automatic-robotic-arm-working-in-a-factory-42475-large.mp4",
+            "https://assets.mixkit.co/videos/preview/mixkit-moving-through-the-aisles-of-a-warehouse-with-shelves-filled-42531-large.mp4",
+            "https://assets.mixkit.co/videos/preview/mixkit-circuit-board-close-up-scanning-41584-large.mp4"
+        ];
+
+        // MOUSE ZOOM
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if(e.deltaY < 0) zoom += 0.1; else zoom -= 0.1;
+            zoom = Math.max(0.5, Math.min(zoom, 4));
+            update();
+        }, { passive: false });
+
+        // KEYBOARD PAN (WASD)
+        window.addEventListener('keydown', (e) => {
+            const step = 50;
+            const key = e.key.toLowerCase();
+            if(key === 'w') py += step; if(key === 's') py -= step;
+            if(key === 'a') px += step; if(key === 'd') px -= step;
+            update();
+        });
+
+        function update() {
+            mount.style.transform = `translate(${px}px, ${py}px) scale(${zoom})`;
+            
+            // SMART LOGIC: Scanner follows "Anomaly" when camera pans
+            const tx = -px * 0.5;
+            const ty = -py * 0.5;
+            scanner.style.transform = `translate(${tx}px, ${ty}px)`;
+
+            if(Math.abs(px) > 150 || Math.abs(py) > 150) {
+                scanner.style.borderColor = "var(--danger)";
+                log.innerHTML = "<b style='color:var(--danger)'>[DETECTED]</b> Violation in Sector S-04. Component heat signature non-compliant with Gold Standard Environmental Journal article (May 2026).";
+            } else {
+                scanner.style.borderColor = "rgba(255,255,255,0.2)";
+                log.innerHTML = "<b>STATUS:</b> NOMINAL. <br><br>Agent panned to center. Scanning factory floor for structural discrepancies and ESG leaks.";
+            }
+        }
+
+        function changeSector(idx, btn) {
+            v.src = sectors[idx];
+            document.querySelectorAll('.btn-sector').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            resetView();
+        }
+
+        function handleUpload(e) {
+            const f = e.target.files[0];
+            if(f) { v.src = URL.createObjectURL(f); resetView(); }
+        }
+
+        function resetView() { px = 0; py = 0; zoom = 1; update(); }
+
+        function nav(m) {
+            closePanels();
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            if(m === 'dec') document.getElementById('panel-decision').classList.add('active');
+            else if(m === 'fix') document.getElementById('panel-fix').classList.add('active');
+            update();
+        }
+
+        function closePanels() { document.querySelectorAll('.fs-panel').forEach(p => p.classList.remove('active')); }
+
+        function runFix() {
+            const l = document.getElementById('fix-log');
+            l.innerHTML = "> Accessing Factory SAP Cloud...<br>> Dispatching Robotic Lubricant Drone...<br>> Recalculating Q2 Risk...<br>> SUCCESS: COMPLIANT.";
+            setTimeout(() => { closePanels(); nav('obs'); }, 2000);
+        }
+    </script>
+</body>
+</html>
