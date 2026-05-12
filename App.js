@@ -1,207 +1,155 @@
-import React, { useState, useEffect } from 'react';
-import { Bluetooth, Wifi, AlertTriangle, CheckCircle, Zap, Eye, BookOpen, Phone, ShoppingCart, Bell, BarChart3, ChevronRight } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoShield ESG Auditor Prototype</title>
+    <!-- Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React and Babel for the UI logic -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans">
+    <div id="root"></div>
 
-const ESGAuditorPrototype = () => {
-  const [activeTab, setActiveTab] = useState('observe');
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [actionLog, setActionLog] = useState([]);
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-  // Mock Connectivity State
-  const [connectivity] = useState({
-    wifi: "Verified: Journal Global Repository Linked",
-    bluetooth: "Active: Drone-X4 Connected"
-  });
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('observe');
+            const [isExecuting, setIsExecuting] = useState(false);
+            const [actionLog, setActionLog] = useState(["> System Initialized..."]);
 
-  // Mock Data mimicking 2026 Multimodal Intelligence
-  const auditReport = {
-    issueType: "Chemical Storage Incompatibility",
-    location: "Sector B - Warehouse 4",
-    description: "Oxidizing agents (Class 5.1) stored within 3 meters of Flammable Liquids (Class 3).",
-    citations: [
-      { journal: "Nature Sustainability (2025)", detail: "Cross-reactive proximity increases fire propagation speed by 40%." },
-      { journal: "ISO 14001:2026", detail: "Clause 8.2: Emergency preparedness requires 5m segregation for hazardous pairings." }
-    ],
-    fixParams: {
-      partRequired: "Fire-Rated Segregation Barrier (V2)",
-      costImpact: "-$1,250 (Unplanned Maintenance)",
-      alarmLevel: "Level 2 (Internal)"
-    }
-  };
+            const handleExecute = (action) => {
+                setIsExecuting(true);
+                setTimeout(() => {
+                    setActionLog(prev => [`> [ACTION] ${action} successful`, ...prev]);
+                    setIsExecuting(false);
+                }, 1500);
+            };
 
-  const handleExecute = (actionType) => {
-    setIsExecuting(true);
-    setTimeout(() => {
-      setActionLog(prev => [...prev, `Successfully executed: ${actionType} at ${new Date().toLocaleTimeString()}`]);
-      setIsExecuting(false);
-    }, 1500);
-  };
+            return (
+                <div class="flex flex-col h-screen overflow-hidden relative">
+                    
+                    <!-- TOP BAR: Connectivity (Upper Left) -->
+                    <div class="absolute top-6 left-6 flex gap-4 z-50">
+                        <div class="flex items-center gap-2 bg-zinc-900/90 border border-blue-500/50 p-2 rounded-lg shadow-lg">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                            <span class="text-[10px] font-bold tracking-widest text-blue-400">BT-DRONE_LINK</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-zinc-900/90 border border-green-500/50 p-2 rounded-lg shadow-lg">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span class="text-[10px] font-bold tracking-widest text-green-400">WIFI_7_JOURNALS</span>
+                        </div>
+                    </div>
 
-  return (
-    <div className="flex flex-col h-screen bg-zinc-950 text-zinc-100 font-sans overflow-hidden">
-      
-      {/* TOP HEADER: Connectivity Logos (Upper Left) */}
-      <div className="absolute top-6 left-6 flex gap-3 z-50">
-        <div className="group relative">
-          <div className="bg-zinc-900/80 p-2 rounded-lg border border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-            <Bluetooth size={20} className="text-blue-400 animate-pulse" />
-          </div>
-          <span className="absolute left-0 top-10 w-48 scale-0 transition-all rounded bg-zinc-800 p-2 text-xs group-hover:scale-100">{connectivity.bluetooth}</span>
-        </div>
-        
-        <div className="group relative">
-          <div className="bg-zinc-900/80 p-2 rounded-lg border border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
-            <Wifi size={20} className="text-green-400 animate-pulse" />
-          </div>
-          <span className="absolute left-0 top-10 w-48 scale-0 transition-all rounded bg-zinc-800 p-2 text-xs group-hover:scale-100">{connectivity.wifi}</span>
-        </div>
-      </div>
+                    <!-- MAIN CONTENT -->
+                    <main class="flex-1 flex items-center justify-center p-6">
+                        
+                        {activeTab === 'observe' && (
+                            <div class="w-full max-w-4xl text-center space-y-4">
+                                <div class="relative bg-zinc-900 border-2 border-red-500/50 rounded-3xl aspect-video overflow-hidden shadow-2xl">
+                                    <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1000" class="w-full h-full object-cover opacity-40 grayscale" />
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <div class="border-2 border-red-500 w-48 h-48 animate-pulse flex flex-col justify-between p-2">
+                                            <span class="bg-red-500 text-[10px] font-bold self-start px-1">INCOMPATIBILITY DETECTED</span>
+                                            <span class="text-red-500 text-[10px] font-mono self-end">REF: ISO-14001</span>
+                                        </div>
+                                    </div>
+                                    <div class="absolute bottom-4 left-6 text-left max-w-sm bg-black/70 p-4 rounded-xl border border-white/10 backdrop-blur-md">
+                                        <p class="text-blue-400 text-[10px] font-black uppercase mb-1">Source: Journal of Industrial Safety (2026)</p>
+                                        <p class="text-xs italic text-zinc-300">"Chemical reactivity increases 400% when stored within 2m of heating vents."</p>
+                                    </div>
+                                </div>
+                                <p class="text-zinc-500 font-mono text-xs uppercase tracking-widest">Observe Mode: Live Multimodal Telemetry Feed</p>
+                            </div>
+                        )}
 
-      {/* MAIN VIEWPORT */}
-      <main className="flex-1 relative flex flex-col items-center justify-center p-6">
-        
-        {/* TAB 1: OBSERVE */}
-        {activeTab === 'observe' && (
-          <div className="w-full max-w-5xl space-y-4 animate-in fade-in zoom-in-95 duration-500">
-            <div className="relative rounded-2xl border-2 border-red-500/40 overflow-hidden bg-zinc-900 aspect-video shadow-2xl">
-              {/* Mock Video Feed Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
-              <div className="absolute top-1/3 left-1/4 w-40 h-40 border-2 border-red-500 animate-pulse flex items-start justify-start p-2">
-                <span className="bg-red-500 text-[10px] font-bold px-1">ANOMALY: INCOMPATIBLE</span>
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none text-4xl font-bold italic uppercase tracking-tighter">
-                Live Drone Feed Stream // Sector B
-              </div>
-              
-              {/* Citation Overlay */}
-              <div className="absolute bottom-6 left-6 z-20 max-w-md bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/10">
-                <h4 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                  <BookOpen size={14} /> Supporting Gold Standards
-                </h4>
-                {auditReport.citations.map((c, i) => (
-                  <p key={i} className="text-[11px] leading-relaxed mb-1 text-zinc-300 italic">
-                    <span className="text-white font-semibold underline">{c.journal}:</span> "{c.detail}"
-                  </p>
-                ))}
-              </div>
-            </div>
-            <div className="text-center">
-              <p className="text-zinc-500 text-sm italic">Analyze multi-modal telemetry from Drone Alpha-1...</p>
-            </div>
-          </div>
-        )}
+                        {activeTab === 'decision' && (
+                            <div class="w-full max-w-5xl grid grid-cols-2 gap-8">
+                                <div class="space-y-4">
+                                    <h3 class="text-red-500 font-black text-sm uppercase tracking-tighter italic">Anomaly State</h3>
+                                    <div class="bg-zinc-900 border border-red-900/50 rounded-2xl p-6 h-64 flex flex-col justify-between">
+                                        <div class="text-zinc-500 text-xs font-mono">PROBLEM: Tank-04 Leakage & Proximity Risk</div>
+                                        <div class="text-3xl font-bold text-red-500">FAILED</div>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <h3 class="text-green-500 font-black text-sm uppercase tracking-tighter italic">Gold Standard</h3>
+                                    <div class="bg-zinc-900 border border-green-900/50 rounded-2xl p-6 h-64 flex flex-col justify-between shadow-[0_0_50px_rgba(34,197,94,0.1)]">
+                                        <div class="text-zinc-500 text-xs font-mono">REQUIRED: Hermetic Seal & 5m Clearance</div>
+                                        <div class="text-3xl font-bold text-green-500">TARGET STATE</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
-        {/* TAB 2: DECISION / RECOMMENDATION */}
-        {activeTab === 'decision' && (
-          <div className="w-full max-w-5xl grid grid-cols-2 gap-6 animate-in slide-in-from-right-8 duration-500">
-            <div className="space-y-4">
-              <h3 className="text-red-400 font-bold flex items-center gap-2 uppercase text-sm tracking-widest"><AlertTriangle size={18}/> Problematic State</h3>
-              <div className="aspect-square bg-zinc-900 rounded-xl border border-red-900/50 flex flex-col items-center justify-center p-8 text-center">
-                <div className="w-full h-full border-2 border-dashed border-red-500/30 rounded flex items-center justify-center text-red-500/50 italic text-sm">
-                  [Highlights: 3.2m Segregation Violation]
+                        {activeTab === 'execute' && (
+                            <div class="w-full max-w-xl bg-zinc-900 border border-white/10 rounded-[3rem] p-10 text-center shadow-2xl">
+                                <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <div class="w-10 h-10 bg-blue-500 rounded-full animate-ping opacity-20 absolute"></div>
+                                    <span class="text-blue-400 text-2xl font-bold">Z</span>
+                                </div>
+                                <h2 class="text-2xl font-black italic uppercase mb-2">Autonomous Action</h2>
+                                <p class="text-zinc-500 text-sm mb-8 italic">Agent is authorized to fix ESG discrepancies via API.</p>
+                                
+                                <div class="space-y-3">
+                                    <button 
+                                        onClick={() => handleExecute("Order Replacement Parts & Alert Maintenance")}
+                                        disabled={isExecuting}
+                                        class="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl uppercase tracking-widest transition-all active:scale-95 disabled:bg-zinc-700"
+                                    >
+                                        {isExecuting ? "Processing..." : "Execute Autonomous Fix"}
+                                    </button>
+                                    <button onClick={() => handleExecute("Alarm Triggered Site-wide")} class="w-full py-4 bg-zinc-800 text-red-400 font-bold rounded-2xl uppercase text-xs">Trigger Alarm</button>
+                                    <button onClick={() => alert("Calling Supervisor...")} class="w-full py-4 bg-transparent border border-zinc-800 text-zinc-500 font-bold rounded-2xl uppercase text-xs hover:text-white transition-colors">Call Human-in-Charge</button>
+                                </div>
+
+                                <div class="mt-8 bg-black/50 p-4 rounded-xl font-mono text-[10px] text-green-500 text-left h-24 overflow-y-auto">
+                                    {actionLog.map((log, i) => <div key={i}>{log}</div>)}
+                                </div>
+                            </div>
+                        )}
+
+                    </main>
+
+                    <!-- BOTTOM NAVIGATION -->
+                    <nav class="h-28 bg-zinc-900 border-t border-white/5 flex items-center justify-around px-8">
+                        <button onClick={() => setActiveTab('observe')} class={`flex flex-col items-center gap-1 ${activeTab === 'observe' ? 'text-blue-500' : 'text-zinc-600'}`}>
+                            <div class={`p-3 rounded-2xl ${activeTab === 'observe' ? 'bg-blue-500/10' : ''}`}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </div>
+                            <span class="text-[9px] font-black uppercase tracking-widest">Observe</span>
+                        </button>
+
+                        <button onClick={() => setActiveTab('decision')} class={`flex flex-col items-center gap-1 ${activeTab === 'decision' ? 'text-blue-500' : 'text-zinc-600'}`}>
+                            <div class={`p-3 rounded-2xl ${activeTab === 'decision' ? 'bg-blue-500/10' : ''}`}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
+                            </div>
+                            <span class="text-[9px] font-black uppercase tracking-widest">Decision</span>
+                        </button>
+
+                        <button onClick={() => setActiveTab('execute')} class={`flex flex-col items-center gap-1 ${activeTab === 'execute' ? 'text-blue-500' : 'text-zinc-600'}`}>
+                            <div class={`p-3 rounded-2xl ${activeTab === 'execute' ? 'bg-blue-500/10' : ''}`}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 14 7-9 1 9h10l-7 9-1-9H5Z"/></svg>
+                            </div>
+                            <span class="text-[9px] font-black uppercase tracking-widest">Fix</span>
+                        </button>
+                    </nav>
                 </div>
-                <p className="mt-4 text-xs text-zinc-400">{auditReport.description}</p>
-              </div>
-            </div>
+            );
+        };
 
-            <div className="space-y-4">
-              <h3 className="text-green-400 font-bold flex items-center gap-2 uppercase text-sm tracking-widest"><CheckCircle size={18}/> Gold Standard Goal</h3>
-              <div className="aspect-square bg-zinc-900 rounded-xl border border-green-900/50 flex flex-col items-center justify-center p-8 text-center shadow-[0_0_30px_rgba(34,197,94,0.1)]">
-                <div className="w-full h-full border-2 border-green-500/30 rounded flex items-center justify-center text-green-500 font-bold italic text-sm">
-                   ISO 14001:2026 COMPLIANT VIEW
-                </div>
-                <p className="mt-4 text-xs text-zinc-400 italic">"Recommendation: Deploy physical partition 'Fire-Shield V2' and recalibrate storage grid."</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: AUTONOMOUS FIX */}
-        {activeTab === 'execute' && (
-          <div className="w-full max-w-2xl bg-zinc-900 p-8 rounded-3xl border border-white/5 shadow-2xl animate-in zoom-in-95">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/50">
-                <Zap className="text-blue-400" size={32} />
-              </div>
-              <h2 className="text-2xl font-bold">Autonomous Agent Logic</h2>
-              <p className="text-zinc-500 text-sm">Targeting: {auditReport.issueType}</p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 mb-8">
-              <button 
-                onClick={() => handleExecute('New Segregation Order + Alarm')}
-                disabled={isExecuting}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 rounded-xl font-bold flex items-center justify-between px-6 transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <ShoppingCart size={20} />
-                  <div className="text-left">
-                    <div className="text-sm">EXECUTE AUTONOMOUS FIX</div>
-                    <div className="text-[10px] opacity-60 font-normal italic">Places order, Rings alarm, Updates Finance</div>
-                  </div>
-                </div>
-                <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => handleExecute('Financial Forecast Updated')} className="p-4 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-zinc-700">
-                  <BarChart3 size={16} /> CRUNCH FINANCES
-                </button>
-                <button onClick={() => handleExecute('Safety Alarm Triggered')} className="p-4 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-zinc-700 text-red-400">
-                  <Bell size={16} /> RING ALARM
-                </button>
-              </div>
-
-              <button className="w-full py-3 bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
-                <Phone size={16} /> MANUAL OVERRIDE: CALL HUMAN-IN-CHARGE
-              </button>
-            </div>
-
-            {/* ACTION LOG */}
-            <div className="bg-black/40 rounded-lg p-4 font-mono text-[10px] text-green-500 h-32 overflow-y-auto border border-white/5">
-              <div className="mb-1 opacity-50 tracking-widest uppercase underline">System Execution Log:</div>
-              {isExecuting && <div className="animate-pulse">_PROCESSING MULTIMODAL DECISION...</div>}
-              {actionLog.map((log, i) => (
-                <div key={i} className="mb-1 animate-in slide-in-from-left-2">{`> ${log}`}</div>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* LOWER BOTTOM FRAME: Three Navigation Buttons */}
-      <nav className="h-28 bg-zinc-900 border-t border-white/5 px-12 flex items-center justify-around shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-        <button 
-          onClick={() => setActiveTab('observe')}
-          className={`flex flex-col items-center gap-2 transition-all ${activeTab === 'observe' ? 'text-blue-400 scale-110' : 'text-zinc-500 hover:text-zinc-300'}`}
-        >
-          <div className={`p-3 rounded-xl ${activeTab === 'observe' ? 'bg-blue-500/10' : ''}`}>
-            <Eye size={28} />
-          </div>
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Observe</span>
-        </button>
-
-        <button 
-          onClick={() => setActiveTab('decision')}
-          className={`flex flex-col items-center gap-2 transition-all ${activeTab === 'decision' ? 'text-blue-400 scale-110' : 'text-zinc-500 hover:text-zinc-300'}`}
-        >
-          <div className={`p-3 rounded-xl ${activeTab === 'decision' ? 'bg-blue-500/10' : ''}`}>
-            <BookOpen size={28} />
-          </div>
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Decision</span>
-        </button>
-
-        <button 
-          onClick={() => setActiveTab('execute')}
-          className={`flex flex-col items-center gap-2 transition-all ${activeTab === 'execute' ? 'text-blue-400 scale-110' : 'text-zinc-500 hover:text-zinc-300'}`}
-        >
-          <div className={`p-3 rounded-xl ${activeTab === 'execute' ? 'bg-blue-500/10' : ''}`}>
-            <Zap size={28} />
-          </div>
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Fix</span>
-        </button>
-      </nav>
-    </div>
-  );
-};
-
-export default ESGAuditorPrototype;
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
